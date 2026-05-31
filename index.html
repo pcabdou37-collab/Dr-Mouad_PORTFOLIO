@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>DR MOUAD | Tech Avatar | ESP32 & Arduino Cyber Specialist</title>
+    <meta name="description" content="DR MOUAD - MOUAD CHERRATI: Embedded Systems Expert, ESP32, Arduino, Futuristic Tech Developer">
+    <meta name="keywords" content="DR MOUAD, ESP32, Arduino, Cyberpunk, Tech, Embedded Systems">
+    <meta name="author" content="MOUAD CHERRATI">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #0a0a0f; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; color: #ffffff; cursor: auto; }
+
+        /* Loading Screen */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0a0a0f, #000000);
+            z-index: 100000; display: flex; justify-content: center; align-items: center; flex-direction: column;
+            transition: opacity 1.2s;
+        }
+        .loader-logo {
+            font-size: 5rem; font-weight: 900;
+            background: linear-gradient(135deg, #00ff88, #00bfff, #ff1744, #aa00ff);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            animation: neonPulse 1.2s infinite alternate; letter-spacing: 4px;
+        }
+        @keyframes neonPulse {
+            0% { text-shadow: 0 0 5px #00ff88; opacity: 0.9; }
+            100% { text-shadow: 0 0 25px #ff1744, 0 0 15px #aa00ff; opacity: 1; }
+        }
+        .loader-bar { width: 320px; height: 4px; background: #1f1f2f; margin-top: 35px; border-radius: 10px; overflow: hidden; box-shadow: 0 0 8px #00bfff; }
+        .loader-progress { width: 0%; height: 100%; background: linear-gradient(90deg, #00ff88, #ff1744, #aa00ff); transition: width 0.2s; }
+        .loader-scan { margin-top: 20px; font-family: monospace; color: #00ff88; letter-spacing: 2px; animation: scanText 1s infinite; }
+        @keyframes scanText { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* Background */
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; }
+        .grid-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0,255,136,0.08) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0,191,255,0.08) 1px, transparent 1px);
+            background-size: 45px 45px; pointer-events: none; z-index: -1;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed; top: 25px; left: 50%; transform: translateX(-50%);
+            width: 88%; max-width: 1250px; background: rgba(10,10,20,0.65);
+            backdrop-filter: blur(14px); border: 1.5px solid rgba(0,255,136,0.5);
+            border-radius: 80px; padding: 14px 35px; z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 0 28px rgba(0,255,136,0.2);
+        }
+        .logo { font-size: 1.9rem; font-weight: 800; background: linear-gradient(125deg, #00ff88, #aa00ff, #ff1744); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .nav-links { display: flex; gap: 2.5rem; }
+        .nav-links a { text-decoration: none; color: #f0f0ff; font-weight: 600; transition: 0.25s; position: relative; }
+        .nav-links a:hover { color: #ff1744; text-shadow: 0 0 6px #ff1744; }
+        .menu-btn { display: none; font-size: 1.9rem; color: #00ff88; cursor: pointer; }
+
+        section { padding: 110px 5%; position: relative; z-index: 2; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .glass-card {
+            background: rgba(12,12,22,0.55); backdrop-filter: blur(12px);
+            border: 1px solid rgba(0,191,255,0.5); border-radius: 32px;
+            padding: 32px; transition: all 0.4s; box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+        }
+        .glass-card:hover { border-color: #ff1744; box-shadow: 0 0 28px rgba(255,23,68,0.3); transform: translateY(-6px); }
+
+        /* Hero Section */
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+        .hero-content { flex: 1.2; }
+        .hero-image { flex: 1; position: relative; text-align: center; }
+        .avatar-3d {
+            width: 320px; height: 320px;
+            background: radial-gradient(circle at 30% 25%, #aa00ff30, #050510);
+            border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+            overflow: hidden; border: 3px solid #ff1744;
+            box-shadow: 0 0 45px #ff174480; animation: floatingNeon 4s infinite ease;
+        }
+        .avatar-3d img { width: 100%; height: 100%; object-fit: cover; }
+        @keyframes floatingNeon {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-18px); box-shadow: 0 0 60px #aa00ff; }
+            100% { transform: translateY(0px); }
+        }
+        .typing-text { font-size: 2.7rem; font-weight: 700; background: linear-gradient(135deg, #ffffff, #00bfff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .neon-btn {
+            background: transparent; border: 2px solid #aa00ff; color: #aa00ff;
+            padding: 12px 28px; margin: 10px 12px 0 0; font-weight: bold;
+            border-radius: 60px; transition: 0.25s; font-size: 1rem; cursor: pointer; backdrop-filter: blur(4px);
+        }
+        .neon-btn:hover { background: #ff1744; border-color: #ff1744; color: #ffffff; box-shadow: 0 0 24px #ff1744; transform: scale(1.05); }
+
+        /* Tech Logos */
+        .logos-section { padding: 50px 5%; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(0,255,136,0.2); border-bottom: 1px solid rgba(0,255,136,0.2); }
+        .logos-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; flex-wrap: wrap; gap: 40px; }
+        .logo-item { text-align: center; transition: all 0.3s; animation: floatLogo 3s infinite ease; }
+        .logo-item i { font-size: 3.5rem; transition: all 0.3s; }
+        .logo-item span { display: block; margin-top: 8px; font-size: 0.8rem; color: #aaa; }
+        .logo-item:hover { transform: translateY(-10px); }
+        @keyframes floatLogo { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        .logo-item:nth-child(1) i { color: #e44d26; }
+        .logo-item:nth-child(2) i { color: #264de4; }
+        .logo-item:nth-child(3) i { color: #f7df1e; }
+        .logo-item:nth-child(4) i { color: #3776ab; }
+        .logo-item:nth-child(5) i { color: #00bfff; }
+        .logo-item:nth-child(6) i { color: #ff1744; }
+        .logo-item:nth-child(7) i { color: #f24e1e; }
+        .logo-item:nth-child(8) i { color: #c69c6d; }
+        .logo-item:nth-child(9) i { color: #00ff88; }
+        .logo-item:nth-child(10) i { color: #aa00ff; }
+
+        /* Cards */
+        .skill-card, .service-card, .project-card {
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            border-radius: 28px; padding: 1.5rem;
+            border-left: 5px solid #00ff88; border-bottom: 1px solid #aa00ff;
+            transition: all 0.3s; cursor: pointer;
+        }
+        .skill-card:hover, .service-card:hover, .project-card:hover { transform: translateY(-8px) scale(1.02); border-left-color: #ff1744; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px; margin-top: 30px; }
+        .stat-number { font-size: 3.2rem; font-weight: 800; background: linear-gradient(145deg, #ff1744, #aa00ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .project-img { width: 100%; height: 180px; object-fit: cover; border-radius: 20px; margin-bottom: 15px; }
+        .project-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); z-index:2000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: 0.25s; }
+        footer { text-align: center; padding: 40px; border-top: 1px solid #ff174450; }
+        @media (max-width: 900px) { .nav-links { display: none; } .menu-btn { display: block; } .hero { flex-direction: column; text-align: center; } .avatar-3d { width: 220px; height: 220px; } }
+        .social-links a { color: #00bfff; font-size: 2rem; margin: 0 15px; transition: 0.25s; display: inline-block; }
+        .social-links a:hover { color: #ff1744; transform: scale(1.2); }
+        .progress-bar-bg { background: #2a2a3a; border-radius: 20px; height: 8px; margin: 12px 0; }
+        .progress-fill { height: 8px; border-radius: 20px; background: linear-gradient(90deg, #00ff88, #aa00ff); width: 0%; transition: width 1s ease; }
+        .gallery-item { background: rgba(0,0,0,0.6); border-radius: 20px; overflow: hidden; text-align: center; border: 1px solid #00bfff; transition: 0.3s; cursor: pointer; }
+        .gallery-img { width: 100%; height: 160px; object-fit: cover; }
+        .gallery-caption { padding: 12px; background: rgba(0,0,0,0.7); }
+        .contact-item-whatsapp { display: flex; align-items: center; gap: 15px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 15px; margin-bottom: 15px; border: 1px solid #25D366; transition: 0.3s; cursor: pointer; }
+        .contact-item-whatsapp:hover { background: rgba(37,211,102,0.2); transform: scale(1.02); }
+        .contact-item-whatsapp i { font-size: 1.8rem; color: #25D366; }
+        .contact-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 15px; margin-bottom: 15px; border: 1px solid #00bfff; }
+        .contact-item i { font-size: 1.5rem; color: #00ff88; }
+        .success-message { background: rgba(0,255,136,0.2); border: 1px solid #00ff88; border-radius: 10px; padding: 10px; margin-top: 10px; text-align: center; color: #00ff88; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div class="loader-logo">⟡ DR MOUAD ⟡</div>
+    <div class="loader-bar"><div class="loader-progress" id="progressFill"></div></div>
+    <div class="loader-scan">[ SCANNING NEURAL LINK ] <span id="percentLoader">0</span>%</div>
+</div>
+
+<canvas id="bg-canvas"></canvas>
+<div class="grid-overlay"></div>
+
+<nav>
+    <div class="logo">⌬ DR MOUAD</div>
+    <div class="nav-links">
+        <a href="#home">HOME</a>
+        <a href="#about">ABOUT</a>
+        <a href="#tech">TECH</a>
+        <a href="#services">SERVICES</a>
+        <a href="#projects">PROJECTS</a>
+        <a href="#contact">CONTACT</a>
+    </div>
+    <div class="menu-btn"><i class="fas fa-bolt"></i></div>
+</nav>
+
+<main>
+    <section id="home" class="hero container">
+        <div class="hero-content">
+            <h1 style="font-size: 4.2rem;"><span style="color:#ff1744;">DR MOUAD</span> <span style="color:#aa00ff;">CHERRATI</span></h1>
+            <div class="typing-text" id="typingEffect"></div>
+            <p style="margin: 20px 0; font-size:1.25rem; color:#ccc;">"Building Futuristic Digital Experiences, Smart Embedded Systems and Creative Solutions."</p>
+            <button class="neon-btn" onclick="scrollToSection('projects')">VIEW PROJECTS</button>
+            <button class="neon-btn" id="downloadCV">DOWNLOAD CV</button>
+            <button class="neon-btn" onclick="scrollToSection('contact')">CONTACT ME</button>
+        </div>
+        <div class="hero-image">
+            <div class="avatar-3d">
+                <!-- صورة بروفايل تكنولوجية - Tech Avatar -->
+                <img id="profileImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230a0a1a'/%3E%3Cstop offset='100%25' stop-color='%231a1a3a'/%3E%3C/linearGradient%3E%3ClinearGradient id='ring1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300ff88'/%3E%3Cstop offset='100%25' stop-color='%23ff1744'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='500' height='500' fill='url(%23bg)'/%3E%3C!-- Outer Tech Ring --%3E%3Ccircle cx='250' cy='250' r='220' fill='none' stroke='url(%23ring1)' stroke-width='4' stroke-dasharray='15 8'/%3E%3Ccircle cx='250' cy='250' r='200' fill='none' stroke='%2300bfff' stroke-width='2' stroke-dasharray='5 10'/%3E%3C!-- CPU / Chip Icon --%3E%3Crect x='175' y='120' width='150' height='150' rx='15' fill='%23111122' stroke='%2300ff88' stroke-width='3'/%3E%3Crect x='195' y='140' width='110' height='110' rx='8' fill='none' stroke='%23ff1744' stroke-width='2'/%3E%3Ccircle cx='250' cy='195' r='20' fill='%2300bfff' opacity='0.8'/%3E%3Ctext x='250' y='205' text-anchor='middle' fill='%23000' font-size='16' font-weight='bold'%3EESP%3C/text%3E%3C!-- Processor details --%3E%3Cline x1='250' y1='160' x2='250' y2='175' stroke='%2300ff88' stroke-width='2'/%3E%3Cline x1='250' y1='215' x2='250' y2='230' stroke='%2300ff88' stroke-width='2'/%3E%3Cline x1='210' y1='195' x2='225' y2='195' stroke='%2300ff88' stroke-width='2'/%3E%3Cline x1='275' y1='195' x2='290' y2='195' stroke='%2300ff88' stroke-width='2'/%3E%3C!-- Text Labels --%3E%3Ctext x='250' y='310' text-anchor='middle' fill='%2300ff88' font-size='28' font-weight='900' font-family='monospace'%3EDR%3C/text%3E%3Ctext x='250' y='350' text-anchor='middle' fill='%23ffffff' font-size='22' font-weight='bold'%3EMOUAD%3C/text%3E%3Ctext x='250' y='385' text-anchor='middle' fill='%23aa00ff' font-size='14' letter-spacing='2'%3EARDUINO%3C/text%3E%3Ctext x='250' y='410' text-anchor='middle' fill='%23ff1744' font-size='14' letter-spacing='1'%3EESP32%3C/text%3E%3Ctext x='250' y='435' text-anchor='middle' fill='%2300bfff' font-size='11'%3EEMBEDDED SYSTEMS%3C/text%3E%3C!-- Small circuit dots --%3E%3Ccircle cx='140' cy='150' r='4' fill='%2300ff88'/%3E%3Ccircle cx='360' cy='150' r='4' fill='%2300ff88'/%3E%3Ccircle cx='140' cy='350' r='4' fill='%23ff1744'/%3E%3Ccircle cx='360' cy='350' r='4' fill='%23ff1744'/%3E%3Ccircle cx='250' cy='470' r='5' fill='%23aa00ff'/%3E%3C/svg%3E" alt="DR MOUAD Tech Avatar">
+            </div>
+            <div style="margin-top: 25px;">
+                <i class="fab fa-python" style="color:#00bfff; font-size:2rem; margin:0 8px;"></i>
+                <i class="fab fa-js" style="color:#ffeb3b; font-size:2rem;"></i>
+                <i class="fas fa-microchip" style="color:#ff1744; font-size:2rem;"></i>
+                <i class="fab fa-arduino" style="color:#00bfff; font-size:2rem; margin:0 8px;"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Programming Logos -->
+    <div class="logos-section">
+        <div class="logos-container">
+            <div class="logo-item"><i class="fab fa-html5"></i><span>HTML5</span></div>
+            <div class="logo-item"><i class="fab fa-css3-alt"></i><span>CSS3</span></div>
+            <div class="logo-item"><i class="fab fa-js"></i><span>JavaScript</span></div>
+            <div class="logo-item"><i class="fab fa-python"></i><span>Python</span></div>
+            <div class="logo-item"><i class="fas fa-microchip"></i><span>ESP32</span></div>
+            <div class="logo-item"><i class="fab fa-arduino"></i><span>Arduino</span></div>
+            <div class="logo-item"><i class="fab fa-react"></i><span>React</span></div>
+            <div class="logo-item"><i class="fab fa-figma"></i><span>Figma</span></div>
+            <div class="logo-item"><i class="fab fa-git-alt"></i><span>Git</span></div>
+            <div class="logo-item"><i class="fas fa-database"></i><span>MongoDB</span></div>
+        </div>
+    </div>
+
+    <!-- About -->
+    <section id="about" class="container">
+        <div class="glass-card">
+            <h2 style="font-size: 2.8rem;"><span style="color:#ff1744;">//</span> ABOUT_ME</h2>
+            <div style="display:flex; flex-wrap:wrap; gap:35px;">
+                <div style="flex:1"><h3 style="color:#00ff88;">MOUAD CHERRATI</h3><p style="margin-top:12px;">Passionate developer and designer specialized in modern web development, embedded systems, cybersecurity projects, ESP32, Arduino, automation, graphic design and digital innovation.</p>
+                <div class="stats-grid" style="margin-top:35px;"><div><div class="stat-number" id="expYears">6+</div><div>Years XP</div></div><div><div class="stat-number" id="projectsCount">32+</div><div>Projects</div></div></div>
+                </div>
+                <div style="flex:1; text-align:center;"><i class="fas fa-microchip" style="font-size:7rem; color:#ff1744; filter:drop-shadow(0 0 12px #ff1744);"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tech" class="container"><h2 style="font-size:2.5rem;"><span style="color:#00ff88;">//</span> TECH_STACK</h2><div class="stats-grid" id="skillsGrid"></div></section>
+    <section id="services" class="container"><h2 style="font-size:2.5rem;"><span style="color:#ff1744;">//</span> SERVICES</h2><div class="stats-grid" id="servicesGrid"></div></section>
+    <section id="projects" class="container"><h2 style="font-size:2.5rem;"><span style="color:#aa00ff;">//</span> PROJECTS</h2><div class="stats-grid" id="projectsGrid"></div></section>
+    <section class="container"><h2><span style="color:#00bfff;">//</span> CERTIFICATIONS</h2><div class="stats-grid"><div class="glass-card"><i class="fab fa-cisco"></i> Cisco</div><div class="glass-card"><i class="fas fa-graduation-cap"></i> Coursera</div><div class="glass-card"><i class="fas fa-microchip"></i> Udemy</div><div class="glass-card"><i class="fab fa-google"></i> Google</div></div></section>
+    <section class="container"><h2><span style="color:#ff1744;">//</span> TESTIMONIALS</h2><div class="stats-grid"><div class="glass-card"><i class="fas fa-quote-left"></i> “DR MOUAD delivered futuristic UI & embedded code faster than light.”</div><div class="glass-card"><i class="fas fa-quote-left"></i> “Telegram bot + ESP32 solution was revolutionary.”</div></div></section>
+    <section class="container"><h2><span style="color:#aa00ff;">//</span> GALLERY</h2><div class="stats-grid" id="galleryGrid"></div></section>
+
+    <!-- Contact -->
+    <section id="contact" class="container">
+        <div class="glass-card">
+            <h2><i class="fas fa-envelope" style="color:#ff1744;"></i> CONTACT_DR_MOUAD</h2>
+            <div class="contact-wrapper" style="display:flex; flex-wrap:wrap; gap:30px;">
+                <form id="contactForm" style="flex:1.5;">
+                    <input type="text" id="userName" placeholder="Full Name" required style="background:#11151f; border:1px solid #00bfff; padding:14px; margin:12px 0; width:100%; color:white; border-radius:40px;">
+                    <input type="email" id="userEmail" placeholder="Email Address" required style="background:#11151f; border:1px solid #00bfff; padding:14px; margin:12px 0; width:100%; border-radius:40px; color:white;">
+                    <textarea id="userMessage" placeholder="Your Message..." rows="4" required style="background:#11151f; border:1px solid #00bfff; width:100%; border-radius:30px; padding:14px; color:white;"></textarea>
+                    <button type="submit" class="neon-btn" id="sendBtn" style="width:100%;">Send Message</button>
+                    <div id="formStatus" style="margin-top:15px;"></div>
+                </form>
+                <div style="flex:1;">
+                    <div class="contact-item"><i class="fas fa-envelope"></i><p>younesspcgaming@gmail.com</p></div>
+                    <div class="contact-item"><i class="fas fa-phone-alt"></i><p>+213540796620</p></div>
+                    <div class="contact-item-whatsapp" onclick="window.open('https://wa.me/213540796620', '_blank')">
+                        <i class="fab fa-whatsapp"></i><div><p style="font-weight:bold;">WhatsApp</p><p style="font-size:0.8rem;">+213 540 79 66 20</p></div>
+                    </div>
+                    <div class="social-links">
+                        <a href="https://github.com/pcabdou37-collab"><i class="fab fa-github"></i></a>
+                        <a href="https://t.me/Pc_click_plusBOT"><i class="fab fa-telegram"></i></a>
+                        <a href="https://t.me/mouaddijitalmarketing09"><i class="fab fa-telegram-plane"></i></a>
+                        <a href="https://wa.me/213540796620"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer>© 2025 DR MOUAD — TECH CYBERPUNK EDITION</footer>
+</main>
+
+<div id="modal" class="project-modal"><div class="glass-card" id="modalContent" style="max-width:650px;"><span style="float:right; font-size:2rem; cursor:pointer;" onclick="closeModal()">&times;</span><div id="modalBody"></div></div></div>
+
+<script>
+    const projectsArr = [
+        {title:"DR HAKER", category:"Cybersecurity / ESP32", desc:"Wi-Fi security using ESP32 & ESP8266.", github:"https://github.com/pcabdou37-collab/dr-haker-version-1.0-esp32-", img:"https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&h=220&fit=crop", tech:"ESP32, C++"},
+        {title:"PC Click Plus BOT", category:"Telegram Bot", desc:"Automation bot for gaming community.", link:"https://t.me/Pc_click_plusBOT", img:"https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&h=220&fit=crop", tech:"Python"},
+        {title:"Jawda Store", category:"E-commerce", desc:"Professional online store.", link:"https://jawdastore09.com", img:"https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&h=220&fit=crop", tech:"React"},
+        {title:"Mouad Marketing", category:"Digital Marketing", desc:"Marketing strategies channel.", link:"https://t.me/mouaddijitalmarketing09", img:"https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=400&h=220&fit=crop", tech:"SEO"}
+    ];
+    const galleryItems = [
+        {title:"Cyber Desk", img:"https://images.unsplash.com/photo-1547082299-de196ea013d6?w=300&h=180&fit=crop"},
+        {title:"UI Design", img:"https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=300&h=180&fit=crop"},
+        {title:"ESP32 Robot", img:"https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?w=300&h=180&fit=crop"},
+        {title:"Dashboard", img:"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300&h=180&fit=crop"},
+        {title:"Gaming Setup", img:"https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300&h=180&fit=crop"}
+    ];
+    const skillsList = ["HTML5", "CSS3", "JavaScript", "Python", "Arduino", "ESP32", "Git", "Figma", "React", "Node.js"];
+    const servicesList = ["Web Dev", "Graphic Design", "ESP32 Solutions", "Arduino", "Telegram Bots", "UI/UX", "Marketing"];
+
+    function buildSkills() {
+        let html = "";
+        skillsList.forEach(skill => {
+            let percent = Math.floor(Math.random() * 30 + 65);
+            html += `<div class="skill-card"><h3><i class="fas fa-microchip"></i> ${skill}</h3><div class="progress-bar-bg"><div class="progress-fill" data-width="${percent}%"></div></div><span style="color:#00ff88;">${percent}%</span></div>`;
+        });
+        document.getElementById("skillsGrid").innerHTML = html;
+        setTimeout(() => document.querySelectorAll(".progress-fill").forEach(el => el.style.width = el.getAttribute("data-width")), 400);
+    }
+    function buildServices() {
+        let html = "";
+        servicesList.forEach(s => html += `<div class="service-card"><i class="fas fa-bolt" style="color:#ff1744; font-size:2rem;"></i><h3>${s}</h3><p>Premium quality</p></div>`);
+        document.getElementById("servicesGrid").innerHTML = html;
+    }
+    function buildProjects() {
+        let html = "";
+        projectsArr.forEach((p, idx) => html += `<div class="project-card" onclick="openProjectModal(${idx})"><img src="${p.img}" class="project-img"><h3>${p.title}</h3><p style="color:#00bfff;">${p.category}</p><button class="neon-btn" style="padding:6px 20px;">⟡ EXPLORE ⟡</button></div>`);
+        document.getElementById("projectsGrid").innerHTML = html;
+    }
+    function buildGallery() {
+        let html = "";
+        galleryItems.forEach(item => html += `<div class="gallery-item" onclick="openImageModal('${item.img}')"><img src="${item.img}" class="gallery-img"><div class="gallery-caption"><p>${item.title}</p></div></div>`);
+        document.getElementById("galleryGrid").innerHTML = html;
+    }
+    window.openProjectModal = (idx) => {
+        let p = projectsArr[idx];
+        let content = `<div style="text-align:center;"><img src="${p.img}" style="width:100%; border-radius:20px;"><h2 style="color:#00ff88;">${p.title}</h2><p><strong>${p.category}</strong></p><p>${p.desc}</p><p>Tech: ${p.tech}</p><div style="margin-top:20px;">`;
+        if(p.github) content += `<a href="${p.github}" target="_blank" class="neon-btn">GitHub</a> `;
+        if(p.link) content += `<a href="${p.link}" target="_blank" class="neon-btn">Live Demo</a>`;
+        content += `</div></div>`;
+        document.getElementById("modalBody").innerHTML = content;
+        document.getElementById("modal").style.visibility = "visible";
+        document.getElementById("modal").style.opacity = "1";
+    };
+    window.openImageModal = (imgSrc) => {
+        document.getElementById("modalBody").innerHTML = `<div style="text-align:center;"><img src="${imgSrc}" style="width:100%; border-radius:20px;"><button class="neon-btn" style="margin-top:20px;" onclick="closeModal()">Close</button></div>`;
+        document.getElementById("modal").style.visibility = "visible";
+        document.getElementById("modal").style.opacity = "1";
+    };
+    window.closeModal = () => { document.getElementById("modal").style.visibility = "hidden"; document.getElementById("modal").style.opacity = "0"; };
+    
+    const rolesList = ["Graphic Designer", "Web Developer", "Python Developer", "ESP32 Developer", "Arduino Developer", "Bot Developer"];
+    let roleIndex = 0, letterIndex = 0, delFlag = false;
+    const typingSpan = document.getElementById("typingEffect");
+    function animateTyping() {
+        let current = rolesList[roleIndex];
+        if (!delFlag && letterIndex <= current.length) typingSpan.innerText = current.substring(0, letterIndex++);
+        else if (delFlag && letterIndex >= 0) typingSpan.innerText = current.substring(0, letterIndex--);
+        if (!delFlag && letterIndex === current.length + 1) { delFlag = true; setTimeout(animateTyping, 1400); return; }
+        if (delFlag && letterIndex === 0) { delFlag = false; roleIndex = (roleIndex + 1) % rolesList.length; }
+        setTimeout(animateTyping, delFlag ? 40 : 85);
+    }
+    animateTyping();
+
+    let loadPercent = 0;
+    const loaderInterval = setInterval(() => {
+        loadPercent += Math.random() * 12;
+        if (loadPercent >= 100) { loadPercent = 100; clearInterval(loaderInterval); setTimeout(() => { document.getElementById("loader").style.opacity = "0"; setTimeout(() => { document.getElementById("loader").style.display = "none"; }, 1000); }, 500); }
+        document.querySelector(".loader-progress").style.width = loadPercent + "%";
+        if(document.getElementById("percentLoader")) document.getElementById("percentLoader").innerText = Math.floor(loadPercent);
+    }, 140);
+
+    document.getElementById("contactForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        document.getElementById("formStatus").innerHTML = '<div class="success-message">✓ Message received! I will contact you soon.</div>';
+        document.getElementById("contactForm").reset();
+    });
+
+    // Three.js Background
+    const scene = new THREE.Scene(); scene.background = new THREE.Color(0x050510);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("bg-canvas"), alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    const positions = new Float32Array(1800 * 3);
+    for (let i = 0; i < 1800; i++) { positions[i*3] = (Math.random() - 0.5) * 200; positions[i*3+1] = (Math.random() - 0.5) * 100; positions[i*3+2] = (Math.random() - 0.5) * 90 - 30; }
+    const particleGeo = new THREE.BufferGeometry(); particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ color: 0xaa00ff, size: 0.12, blending: THREE.AdditiveBlending }));
+    scene.add(particles);
+    const ringGeo = new THREE.TorusGeometry(2.8, 0.08, 64, 200);
+    const ringRed = new THREE.Mesh(ringGeo, new THREE.MeshStandardMaterial({ color: 0xff1744, emissive: 0x440000 })); ringRed.position.set(4, -1, -8); scene.add(ringRed);
+    const ringPurple = new THREE.Mesh(ringGeo, new THREE.MeshStandardMaterial({ color: 0xaa00ff, emissive: 0x330066 })); ringPurple.scale.set(1.3, 1.3, 1.3); ringPurple.position.set(-3, 2, -6); scene.add(ringPurple);
+    scene.add(new THREE.AmbientLight(0x222222));
+    const light = new THREE.PointLight(0x00ff88, 0.6); light.position.set(5, 5, 12); scene.add(light);
+    camera.position.z = 28;
+    function animateScene() { requestAnimationFrame(animateScene); particles.rotation.y += 0.0008; ringRed.rotation.z += 0.008; ringPurple.rotation.x += 0.006; renderer.render(scene, camera); }
+    animateScene();
+
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.utils.toArray(".glass-card, .skill-card, .service-card, .project-card, .logo-item").forEach(el => gsap.from(el, { opacity: 0, y: 60, duration: 0.9, scrollTrigger: { trigger: el, start: "top 85%" } }));
+    document.querySelectorAll(".skill-card, .service-card, .project-card, .neon-btn, .glass-card, .logo-item").forEach(el => {
+        el.addEventListener("mouseenter", () => gsap.to(el, { scale: 1.03, duration: 0.2 }));
+        el.addEventListener("mouseleave", () => gsap.to(el, { scale: 1, duration: 0.2 }));
+    });
+    window.scrollToSection = (id) => { document.getElementById(id).scrollIntoView({ behavior: "smooth" }); };
+    document.getElementById("downloadCV")?.addEventListener("click", () => alert("📄 DR MOUAD CV available upon request."));
+    document.querySelector(".menu-btn")?.addEventListener("click", () => { document.querySelector(".nav-links").style.display = document.querySelector(".nav-links").style.display === "flex" ? "none" : "flex"; });
+    buildSkills(); buildServices(); buildProjects(); buildGallery();
+</script>
+</body>
+</html>
